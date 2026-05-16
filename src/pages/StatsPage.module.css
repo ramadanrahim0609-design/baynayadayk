@@ -1,0 +1,170 @@
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg-primary);
+}
+
+.main {
+  padding: var(--spacing-md) var(--spacing-lg);
+  padding-bottom: calc(80px + var(--spacing-lg));
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.overviewCard {
+  padding: var(--spacing-lg);
+}
+
+.overviewHeader {
+  margin-bottom: var(--spacing-lg);
+}
+
+.overviewTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.overviewSubtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-sm);
+}
+
+.statIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.statLabel {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.section {
+  margin-top: var(--spacing-sm);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.sectionTitle svg {
+  color: var(--color-primary);
+}
+
+.achievementsList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.achievementCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  opacity: 0.6;
+  transition: all var(--transition-fast);
+}
+
+.achievementCard.unlocked {
+  opacity: 1;
+}
+
+.achievementIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.achievementIcon.active {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.achievementContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.achievementTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.achievementDesc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.achievementBadge {
+  color: #FFD700;
+}
+
+.insightCard {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.insightItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.insightLabel {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.insightValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.insightDivider {
+  width: 1px;
+  height: 40px;
+  background: var(--color-border-light);
+}
