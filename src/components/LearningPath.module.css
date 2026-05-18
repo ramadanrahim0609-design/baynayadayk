@@ -177,9 +177,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-lg);
   position: relative;
   padding: var(--spacing-md) 0;
+}
+
+/* Vertical path line */
+.pathLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  background: linear-gradient(180deg, var(--color-border) 0%, var(--color-primary) 50%, var(--color-border) 100%);
+  border-radius: 2px;
+  opacity: 0.25;
+  z-index: 0;
 }
 
 .nodeWrapper {
@@ -187,24 +200,26 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-xs);
-  transform: translateX(var(--zigzag, 0px));
   position: relative;
+  z-index: 1;
+  width: 100%;
+  padding-top: var(--spacing-lg);
 }
 
-/* Connector line between nodes */
+/* Connector between nodes */
 .connector {
   position: absolute;
-  top: -32px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
-  height: 32px;
-  background: linear-gradient(180deg, var(--color-border) 0%, var(--color-primary) 100%);
+  height: 24px;
+  background: var(--color-primary);
+  opacity: 0.3;
   border-radius: 2px;
-  opacity: 0.5;
 }
 
-/* Lesson node - Duolingo style */
+/* Lesson node */
 .node {
   width: 80px;
   height: 80px;

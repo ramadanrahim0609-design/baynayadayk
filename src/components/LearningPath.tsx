@@ -41,6 +41,9 @@ const typeColors: Record<string, { bg: string; shadow: string; glow: string }> =
   },
 };
 
+// Zigzag pattern: left, center-left, center, center-right, right, center-right, center, center-left...
+const zigzagOffsets = [-70, -35, 0, 35, 70, 35, 0, -35];
+
 export function LearningPath() {
   const navigate = useNavigate();
   const { getLessonStatus, completedLessons, xp, level, userProgress } = useAppStore();
@@ -65,7 +68,7 @@ export function LearningPath() {
     }
   };
 
-  // Group lessons by chapter for section headers
+  // Group lessons by chapter
   const groupedLessons = lessonPath.reduce((acc, lesson) => {
     const chapter = lesson.lesson || 1;
     if (!acc[chapter]) {
@@ -93,6 +96,9 @@ export function LearningPath() {
     15: 'Здоровье',
     16: 'Каникулы',
   };
+
+  // Calculate global index for zigzag
+  let globalIndex = 0;
 
   return (
     <div className={styles.path}>
@@ -147,35 +153,34 @@ export function LearningPath() {
 
               {/* Zigzag lesson nodes */}
               <div className={styles.zigzagPath}>
-                {lessons.map((lesson, index) => {
+                {/* Vertical path line */}
+                <div className={styles.pathLine} />
+
+                {lessons.map((lesson) => {
                   const status = getLessonStatus(lesson.id);
                   const isCompleted = completedLessons.includes(lesson.id);
                   const isLocked = status === 'locked';
                   const isCurrent = !isLocked && !isCompleted;
 
-                  // Zigzag offset: alternate left/right
-                  const zigzagOffset = index % 2 === 0 ? -50 : 50;
                   const colors = typeColors[lesson.type] || typeColors.words;
+                  const zigzagIndex = globalIndex % zigzagOffsets.length;
+                  const xOffset = zigzagOffsets[zigzagIndex];
+                  globalIndex++;
 
                   return (
                     <motion.div
                       key={lesson.id}
                       className={styles.nodeWrapper}
-                      style={{ '--zigzag': `${zigzagOffset}px` } as React.CSSProperties}
+                      style={{ transform: `translateX(${xOffset}px)` }}
                       initial={{ opacity: 0, y: 30 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
                         duration: 0.5,
-                        delay: index * 0.08,
+                        delay: (globalIndex % zigzagOffsets.length) * 0.08,
                         type: 'spring',
                         stiffness: 100,
                       }}
                     >
-                      {/* Connector line */}
-                      {index > 0 && (
-                        <div className={styles.connector} />
-                      )}
-
                       <motion.button
                         className={`${styles.node} ${isLocked ? styles.locked : ''} ${isCompleted ? styles.completed : ''} ${isCurrent ? styles.current : ''}`}
                         style={{

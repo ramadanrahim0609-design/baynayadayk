@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Send, Heart, Star, Unlock, RotateCcw } from 'lucide-react';
+import { BookOpen, Send, Heart, Star, Unlock, RotateCcw, Crown } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Navigation } from '../components/Navigation';
 import { Card } from '../components/Card';
@@ -9,6 +9,37 @@ import styles from './AboutPage.module.css';
 
 export function AboutPage() {
   const { unlockAllLessons, resetProgress } = useAppStore();
+
+  const handlePremium = async () => {
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      const telegramId = tg?.initDataUnsafe?.user?.id;
+
+      console.log('Sending premium request for telegramId:', telegramId);
+
+      const response = await fetch('/api/invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId }),
+      });
+
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { raw: text };
+      }
+
+      console.log('Premium invoice response:', data);
+
+      if (data.invoiceUrl) {
+        tg?.openInvoice(data.invoiceUrl);
+      }
+    } catch (error) {
+      console.error('Premium error:', error);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -136,6 +167,17 @@ export function AboutPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <button className={styles.premiumButton} onClick={handlePremium}>
+            <Crown size={24} />
+            <span>⭐ Unlock Premium</span>
+          </button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
           className={styles.actionButtons}
         >
           <Button
@@ -161,7 +203,7 @@ export function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.35 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
           className={styles.footer}
         >
           <p className={styles.footerText}>

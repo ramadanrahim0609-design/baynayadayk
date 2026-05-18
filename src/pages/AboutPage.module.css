@@ -184,3 +184,33 @@
   flex-direction: column;
   gap: var(--spacing-md);
 }
+
+.premiumButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #FFC800 0%, #FF9600 100%);
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #E68600, 0 8px 16px rgba(255, 150, 0, 0.4);
+  transition: all var(--transition-fast);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.premiumButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #E68600, 0 12px 24px rgba(255, 150, 0, 0.5);
+}
+
+.premiumButton:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #E68600, 0 4px 8px rgba(255, 150, 0, 0.3);
+}
