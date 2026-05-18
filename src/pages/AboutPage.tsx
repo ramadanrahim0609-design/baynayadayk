@@ -33,8 +33,9 @@ export function AboutPage() {
 
       console.log('Premium invoice response:', data);
 
-      if (data.invoiceUrl) {
-        tg?.openInvoice(data.invoiceUrl);
+      const invoiceUrl = data.invoice_url || data.invoiceUrl;
+      if (invoiceUrl) {
+        tg?.openInvoice(invoiceUrl);
       }
     } catch (error) {
       console.error('Premium error:', error);
