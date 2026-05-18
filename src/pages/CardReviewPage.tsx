@@ -236,13 +236,15 @@ export function CardReviewPage() {
           >
             <div
               className={styles.cardWrapper}
-              onClick={() => !isFlipped && setIsFlipped(true)}
+              onClick={() => setIsFlipped(!isFlipped)}
             >
               <AnimatePresence mode="wait">
                 {!isFlipped ? (
                   <motion.div
                     key="front"
                     className={`${styles.card} ${styles.front}`}
+                    initial={{ rotateY: 90, opacity: 0 }}
+                    animate={{ rotateY: 0, opacity: 1 }}
                     exit={{ rotateY: -90, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
@@ -264,13 +266,17 @@ export function CardReviewPage() {
                   <motion.div
                     key="back"
                     className={`${styles.card} ${styles.back}`}
-                    initial={{ rotateY: 90, opacity: 0 }}
+                    initial={{ rotateY: -90, opacity: 0 }}
                     animate={{ rotateY: 0, opacity: 1 }}
+                    exit={{ rotateY: 90, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                   >
                     <div className={styles.translation}>{currentWord?.translation}</div>
                     <div className={styles.transliteration}>{currentWord?.transliteration}</div>
                     <div className={styles.category}>{currentWord?.category}</div>
+                    <div className={styles.flipHint}>
+                      <span>Нажми, чтобы вернуться</span>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
