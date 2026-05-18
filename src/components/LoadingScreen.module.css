@@ -41,6 +41,15 @@
   margin-top: -8px;
 }
 
+.loadingXP {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: var(--spacing-sm);
+}
+
 .loadingBar {
   height: 4px;
   background: rgba(255, 255, 255, 0.5);

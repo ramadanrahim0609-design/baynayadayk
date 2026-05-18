@@ -5,7 +5,7 @@ import styles from './Navigation.module.css';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Главная' },
-  { path: '/study', icon: BookOpen, label: 'Учёба' },
+  { path: '/grammar', icon: BookOpen, label: 'Грамматика' },
   { path: '/about', icon: Info, label: 'О приложении' },
 ];
 

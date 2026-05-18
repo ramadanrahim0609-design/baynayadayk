@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, BookOpen, Target, Award, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, Target, Award, Sparkles, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
@@ -9,26 +9,26 @@ import styles from './OnboardingPage.module.css';
 const slides = [
   {
     icon: BookOpen,
-    title: 'Учи арабские слова',
-    titleAr: 'تعلّم الكلمات العربية',
-    description: 'Запоминай слова из словаря «Байна Ядайк» с помощью красивых карточек и интервального повторения.',
-    descriptionAr: 'احفظ الكلمات من قاموس بين يديك باستخدام البطاقات الجميلة والتكرار المتباعد',
+    title: 'Учи арабский легко',
+    titleAr: 'تعلّم العربية بسهولة',
+    description: '641 слово из словаря «Байна Ядайк» с интервальным повторением и упражнениями.',
+    descriptionAr: '٦٤١ كلمة من قاموس بين يديك مع التكرار المتباعد والتمارين',
     color: '#2D5BFF',
   },
   {
-    icon: Target,
-    title: 'Ставь цель на день',
-    titleAr: 'حدد هدفك اليومي',
-    description: 'Выбери, сколько слов хочешь учить каждый день, и следи за прогрессом.',
-    descriptionAr: 'اختر عدد الكلمات التي تريد تعلمها كل يوم وتابع تقدمك',
+    icon: Zap,
+    title: 'Проходи уроки',
+    titleAr: 'أكمل الدروس',
+    description: 'Путь обучения как в Duolingo: слова → грамматика → упражнения → тесты.',
+    descriptionAr: 'مسار التعلم مثل دولينجو: كلمات ← قواعد ← تمارين ← اختبارات',
     color: '#10B981',
   },
   {
     icon: Award,
-    title: 'Получай достижения',
-    titleAr: 'احصل على الإنجازات',
-    description: 'Зарабатывай значки, поддерживай серии и открывай достижения по мере обучения.',
-    descriptionAr: 'اجمع الشارات وحافظ على سلاسل التعلم وافتح الإنجازات أثناء تقدمك',
+    title: 'Получай награды',
+    titleAr: 'احصل على المكافآت',
+    description: 'XP, уровни, серии дней и достижения — учись с удовольствием каждый день.',
+    descriptionAr: 'نقاط XP ومستويات وسلاسل يومية وإنجازات - تعلم كل يوم بسرور',
     color: '#FF6B35',
   },
 ];

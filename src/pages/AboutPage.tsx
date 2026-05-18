@@ -1,11 +1,15 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Send, Heart, Star } from 'lucide-react';
+import { BookOpen, Send, Heart, Star, Unlock, RotateCcw } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Navigation } from '../components/Navigation';
 import { Card } from '../components/Card';
+import { Button } from '../components/Button';
+import { useAppStore } from '../store/useAppStore';
 import styles from './AboutPage.module.css';
 
 export function AboutPage() {
+  const { unlockAllLessons, resetProgress } = useAppStore();
+
   return (
     <div className={styles.page}>
       <Header title="О приложении" />
@@ -54,6 +58,33 @@ export function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+        >
+          <Card className={styles.devCard} padding="lg">
+            <h2 className={styles.devTitle}>Устаз</h2>
+            <div className={styles.devInfo}>
+              <div className={styles.devAvatar}>
+                <span className={styles.devInitial}>АР</span>
+              </div>
+              <div className={styles.devDetails}>
+                <span className={styles.devName}>Адам Абу Робиа</span>
+                <a
+                  href="https://t.me/iibn_jabal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.devLink}
+                >
+                  <Send size={16} />
+                  @iibn_jabal
+                </a>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <Card className={styles.infoCard} padding="lg">
@@ -68,7 +99,7 @@ export function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
+          transition={{ duration: 0.5, delay: 0.25 }}
         >
           <Card className={styles.featuresCard} padding="lg">
             <h3 className={styles.featuresTitle}>Возможности</h3>
@@ -104,7 +135,33 @@ export function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className={styles.actionButtons}
+        >
+          <Button
+            variant="outline"
+            size="lg"
+            icon={<Unlock size={18} />}
+            onClick={unlockAllLessons}
+            fullWidth
+          >
+            Открыть все уроки
+          </Button>
+          <Button
+            variant="ghost"
+            size="lg"
+            icon={<RotateCcw size={18} />}
+            onClick={resetProgress}
+            fullWidth
+          >
+            Сбросить прогресс
+          </Button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
           className={styles.footer}
         >
           <p className={styles.footerText}>

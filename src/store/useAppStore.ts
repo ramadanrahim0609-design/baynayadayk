@@ -2,36 +2,59 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Word, StudySession, UserProgress, Achievement, ThemeMode } from '../types';
 import { words, achievements } from '../data/dictionary';
+import { grammarRules } from '../data/grammar';
+import { lessonPath } from '../data/lessons';
 import { v4 as uuidv4 } from 'uuid';
-import { differenceInDays, parseISO, startOfDay } from 'date-fns';
+import { startOfDay, parseISO } from 'date-fns';
+
+interface ExerciseResult {
+  lessonId: string;
+  score: number;
+  total: number;
+  xpEarned: number;
+  date: string;
+}
 
 interface AppState {
   userProgress: UserProgress;
   studySessions: StudySession[];
   favorites: string[];
-  completedLessons: number[];
+  completedLessons: string[];
   unlockedAchievements: string[];
   theme: ThemeMode;
   hasOnboarded: boolean;
   dailyGoal: number;
+  xp: number;
+  level: number;
+  exerciseResults: ExerciseResult[];
+  completedGrammar: string[];
+  streakFreezes: number;
 
   setTheme: (theme: ThemeMode) => void;
   setOnboarded: (value: boolean) => void;
   setDailyGoal: (goal: number) => void;
+  unlockAllLessons: () => void;
+  resetProgress: () => void;
+
+  addXP: (amount: number) => void;
+  completeLesson: (lessonId: string, score: number, total: number) => void;
+  completeGrammar: (grammarId: string) => void;
 
   markWordKnown: (wordId: string) => void;
   markWordUnknown: (wordId: string) => void;
   addToFavorites: (wordId: string) => void;
   removeFromFavorites: (wordId: string) => void;
-  completeLesson: (lesson: number) => void;
 
   getWordsForReview: () => Word[];
   getFavoriteWords: () => Word[];
   getWordsByLesson: (lesson: number) => Word[];
   getWordsByCategory: (category: string) => Word[];
+  getWordsByIds: (ids: string[]) => Word[];
 
   checkAchievements: () => Achievement[];
   getTodayProgress: () => { learned: number; goal: number; percentage: number };
+  getLessonStatus: (lessonId: string) => 'locked' | 'available' | 'completed';
+  getTotalWordsLearned: () => number;
 }
 
 const calculateNextReview = (session: StudySession, status: 'known' | 'unknown'): StudySession => {
@@ -41,12 +64,12 @@ const calculateNextReview = (session: StudySession, status: 'known' | 'unknown')
     if (repetitions === 0) {
       interval = 1;
     } else if (repetitions === 1) {
-      interval = 6;
+      interval = 3;
     } else {
       interval = Math.round(interval * easeFactor);
     }
     repetitions += 1;
-    easeFactor = Math.max(1.3, easeFactor + 0.1);
+    easeFactor = Math.max(1.3, easeFactor + 0.1 - (Math.random() * 0.05));
   } else {
     interval = 1;
     repetitions = 0;
@@ -69,6 +92,10 @@ const initialProgress: UserProgress = {
   totalStudyTime: 0,
 };
 
+const calculateLevel = (xp: number): number => {
+  return Math.floor(xp / 100) + 1;
+};
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -80,10 +107,55 @@ export const useAppStore = create<AppState>()(
       theme: 'light',
       hasOnboarded: false,
       dailyGoal: 10,
+      xp: 0,
+      level: 1,
+      exerciseResults: [],
+      completedGrammar: [],
+      streakFreezes: 0,
 
       setTheme: (theme) => set({ theme }),
       setOnboarded: (value) => set({ hasOnboarded: value }),
       setDailyGoal: (goal) => set({ dailyGoal: goal }),
+      unlockAllLessons: () => {
+        const maxXP = 2000;
+        set({ xp: maxXP, level: calculateLevel(maxXP) });
+      },
+      resetProgress: () => {
+        set({ xp: 0, level: 1, completedLessons: [], completedGrammar: [], exerciseResults: [], userProgress: initialProgress, studySessions: [], favorites: [], unlockedAchievements: [] });
+      },
+
+      addXP: (amount) => {
+        const { xp } = get();
+        const newXP = xp + amount;
+        const newLevel = calculateLevel(newXP);
+        set({ xp: newXP, level: newLevel });
+      },
+
+      completeLesson: (lessonId, score, total) => {
+        const { completedLessons, xp } = get();
+        const percentage = (score / total) * 100;
+        const xpEarned = Math.round(score * 10);
+
+        set({
+          completedLessons: completedLessons.includes(lessonId) ? completedLessons : [...completedLessons, lessonId],
+          xp: xp + xpEarned,
+          level: calculateLevel(xp + xpEarned),
+          exerciseResults: [
+            ...get().exerciseResults,
+            { lessonId, score, total, xpEarned, date: new Date().toISOString() },
+          ],
+        });
+
+        get().checkAchievements();
+      },
+
+      completeGrammar: (grammarId) => {
+        const { completedGrammar } = get();
+        if (!completedGrammar.includes(grammarId)) {
+          set({ completedGrammar: [...completedGrammar, grammarId] });
+          get().addXP(25);
+        }
+      },
 
       markWordKnown: (wordId) => {
         const { studySessions, userProgress } = get();
@@ -116,17 +188,25 @@ export const useAppStore = create<AppState>()(
           newStreak = 1;
         }
 
+        const isFirstTime = !existingSession;
+
         set({
           studySessions: [...studySessions.filter(s => s.wordId !== wordId), newSession],
           userProgress: {
             ...userProgress,
-            totalWordsLearned: userProgress.totalWordsLearned + (!existingSession ? 1 : 0),
+            totalWordsLearned: userProgress.totalWordsLearned + (isFirstTime ? 1 : 0),
             currentStreak: newStreak,
             longestStreak: Math.max(userProgress.longestStreak, newStreak),
             lastStudyDate: new Date().toISOString(),
             todayWordsLearned: userProgress.todayWordsLearned + 1,
           },
         });
+
+        if (isFirstTime) {
+          get().addXP(15);
+        } else {
+          get().addXP(5);
+        }
 
         get().checkAchievements();
       },
@@ -154,6 +234,8 @@ export const useAppStore = create<AppState>()(
         set({
           studySessions: [...studySessions.filter(s => s.wordId !== wordId), newSession],
         });
+
+        get().addXP(2);
       },
 
       addToFavorites: (wordId) => set(state => ({
@@ -162,12 +244,6 @@ export const useAppStore = create<AppState>()(
 
       removeFromFavorites: (wordId) => set(state => ({
         favorites: state.favorites.filter(id => id !== wordId),
-      })),
-
-      completeLesson: (lesson) => set(state => ({
-        completedLessons: state.completedLessons.includes(lesson)
-          ? state.completedLessons
-          : [...state.completedLessons, lesson],
       })),
 
       getWordsForReview: () => {
@@ -204,8 +280,12 @@ export const useAppStore = create<AppState>()(
         return words.filter(w => w.category === category);
       },
 
+      getWordsByIds: (ids) => {
+        return words.filter(w => ids.includes(w.id));
+      },
+
       checkAchievements: () => {
-        const { userProgress, unlockedAchievements } = get();
+        const { userProgress, unlockedAchievements, xp, completedLessons } = get();
         const newUnlocks: string[] = [];
 
         achievements.forEach(achievement => {
@@ -222,6 +302,9 @@ export const useAppStore = create<AppState>()(
               break;
             case 'days':
               unlocked = userProgress.totalStudyTime >= achievement.requirement;
+              break;
+            case 'accuracy':
+              unlocked = xp >= achievement.requirement * 10;
               break;
           }
 
@@ -246,9 +329,28 @@ export const useAppStore = create<AppState>()(
           percentage,
         };
       },
+
+      getLessonStatus: (lessonId) => {
+        const { completedLessons, xp } = get();
+        if (completedLessons.includes(lessonId)) return 'completed';
+
+        const lesson = lessonPath.find(l => l.id === lessonId);
+        if (!lesson) return 'locked';
+
+        if (xp >= lesson.requiredXP) return 'available';
+        return 'locked';
+      },
+
+      getTotalWordsLearned: () => {
+        const { studySessions } = get();
+        const uniqueWords = new Set(
+          studySessions.filter(s => s.status === 'known' || s.status === 'reviewing').map(s => s.wordId)
+        );
+        return uniqueWords.size;
+      },
     }),
     {
-      name: 'bayna-yadayk-storage',
+      name: 'bayna-yadayk-storage-v2',
     }
   )
 );

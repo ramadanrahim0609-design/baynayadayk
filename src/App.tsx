@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
-import { HomePage } from './pages/HomePage';
-import { StudyPage } from './pages/StudyPage';
+import { LearnPage } from './pages/LearnPage';
+import { ExercisePage } from './pages/ExercisePage';
+import { GrammarPage } from './pages/GrammarPage';
+import { CardReviewPage } from './pages/CardReviewPage';
 import { AboutPage } from './pages/AboutPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { LoadingScreen } from './components/LoadingScreen';
@@ -38,8 +40,10 @@ function AppContent() {
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/study" element={<StudyPage />} />
+      <Route path="/" element={<LearnPage />} />
+      <Route path="/card" element={<CardReviewPage />} />
+      <Route path="/exercise" element={<ExercisePage />} />
+      <Route path="/grammar" element={<GrammarPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

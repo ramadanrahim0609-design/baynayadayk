@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Zap } from 'lucide-react';
 import styles from './LoadingScreen.module.css';
 
 export function LoadingScreen() {
@@ -38,8 +38,17 @@ export function LoadingScreen() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          Словарь арабских слов
+          Учи арабский как в Duolingo
         </motion.p>
+        <motion.div
+          className={styles.loadingXP}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
+          <Zap size={14} />
+          <span>Готовим уроки...</span>
+        </motion.div>
       </motion.div>
 
       <motion.div

@@ -35,12 +35,11 @@ export function Header({
             onClick={() => navigate(-1)}
             whileTap={{ scale: 0.9 }}
           >
-            <ArrowLeft size={24} />
+            <ArrowLeft size={22} />
           </motion.button>
         )}
+        {title && <h1 className={styles.title}>{title}</h1>}
       </div>
-
-      {title && <h1 className={styles.title}>{title}</h1>}
 
       <div className={styles.right}>
         {rightElement}

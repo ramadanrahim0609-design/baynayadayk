@@ -178,3 +178,9 @@
   color: var(--color-text-tertiary);
   margin-top: var(--spacing-xs);
 }
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}

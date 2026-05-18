@@ -5,19 +5,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--color-bg-primary);
+  padding: var(--spacing-md) var(--spacing-md);
+  background: var(--color-bg-card);
   border-bottom: 1px solid var(--color-border-light);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .transparent {
   background: transparent;
   border-bottom: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .left {
   display: flex;
   align-items: center;
+  gap: var(--spacing-sm);
   min-width: 48px;
 }
 
@@ -40,37 +45,41 @@
 .backButton {
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   border: none;
-  background: var(--color-border-light);
+  background: var(--color-bg-elevated);
   color: var(--color-text-primary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .backButton:hover {
   background: var(--color-primary);
   color: white;
+  box-shadow: 0 4px 0 var(--color-primary-dark), var(--shadow-md);
 }
 
 .themeToggle {
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-md);
   border: none;
-  background: var(--color-border-light);
+  background: var(--color-bg-elevated);
   color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .themeToggle:hover {
-  background: var(--color-primary);
+  background: var(--color-secondary);
   color: white;
+  box-shadow: 0 4px 0 var(--color-secondary-dark), var(--shadow-md);
 }
