@@ -15,6 +15,11 @@ export function AboutPage() {
       const tg = (window as any).Telegram?.WebApp;
       const telegramId = tg?.initDataUnsafe?.user?.id;
 
+      if (!telegramId) {
+        alert('Открой приложение внутри Telegram');
+        return;
+      }
+
       console.log('Sending premium request for telegramId:', telegramId);
 
       const response = await fetch('/api/invoice', {
