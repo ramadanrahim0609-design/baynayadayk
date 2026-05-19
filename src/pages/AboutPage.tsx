@@ -14,7 +14,7 @@ export function AboutPage() {
     const tg = (window as any).Telegram?.WebApp;
 
     if (!tg) {
-      alert('Открой приложение внутри Telegram');
+      console.log('Telegram WebApp not available');
       return;
     }
 
@@ -23,10 +23,10 @@ export function AboutPage() {
 
       const telegramId = tg.initDataUnsafe?.user?.id;
 
-      console.log('Telegram WebApp ready, telegramId:', telegramId);
+      console.log('telegramId', telegramId);
 
       if (!telegramId) {
-        alert('Открой приложение внутри Telegram');
+        console.log('telegramId missing');
         return;
       }
 
