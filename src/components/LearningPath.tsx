@@ -57,7 +57,14 @@ export function LearningPath() {
 
   const handleLessonClick = (lesson: LessonNode) => {
     const status = getLessonStatus(lesson.id);
-    if (status === 'locked') return;
+
+    if (status === 'locked') {
+      const isPremiumChapter = lesson.lesson > 3;
+      if (isPremiumChapter) {
+        navigate('/subscription');
+      }
+      return;
+    }
 
     if (lesson.type === 'grammar') {
       navigate(`/grammar?lesson=${lesson.lesson}`);

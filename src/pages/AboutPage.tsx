@@ -1,61 +1,16 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Send, Heart, Star, Unlock, RotateCcw, Crown } from 'lucide-react';
+import { BookOpen, Send, Heart, Star, RotateCcw, Crown } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Navigation } from '../components/Navigation';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
+import { useNavigate } from 'react-router-dom';
 import styles from './AboutPage.module.css';
 
 export function AboutPage() {
-  const { unlockAllLessons, resetProgress } = useAppStore();
-
-  const handlePremium = async () => {
-    const tg = (window as any).Telegram?.WebApp;
-
-    if (!tg) {
-      console.log('Telegram WebApp not available');
-      return;
-    }
-
-    try {
-      tg.ready();
-
-      const telegramId = tg.initDataUnsafe?.user?.id;
-
-      console.log('telegramId', telegramId);
-
-      if (!telegramId) {
-        console.log('telegramId missing');
-        return;
-      }
-
-      console.log('Sending premium request for telegramId:', telegramId);
-
-      const response = await fetch('/api/invoice', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramId }),
-      });
-
-      const text = await response.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { raw: text };
-      }
-
-      console.log('Premium invoice response:', data);
-
-      const invoiceUrl = data.invoice_url || data.invoiceUrl;
-      if (invoiceUrl) {
-        tg.openInvoice(invoiceUrl);
-      }
-    } catch (error) {
-      console.error('Premium error:', error);
-    }
-  };
+  const navigate = useNavigate();
+  const { resetProgress } = useAppStore();
 
   return (
     <div className={styles.page}>
@@ -184,9 +139,9 @@ export function AboutPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <button className={styles.premiumButton} onClick={handlePremium}>
+          <button className={styles.premiumButton} onClick={() => navigate('/subscription')}>
             <Crown size={24} />
-            <span>⭐ Unlock Premium</span>
+            <span>⭐ Получить Premium</span>
           </button>
         </motion.div>
 
@@ -196,15 +151,6 @@ export function AboutPage() {
           transition={{ duration: 0.5, delay: 0.35 }}
           className={styles.actionButtons}
         >
-          <Button
-            variant="outline"
-            size="lg"
-            icon={<Unlock size={18} />}
-            onClick={unlockAllLessons}
-            fullWidth
-          >
-            Открыть все уроки
-          </Button>
           <Button
             variant="ghost"
             size="lg"

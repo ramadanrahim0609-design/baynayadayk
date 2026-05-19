@@ -1,0 +1,215 @@
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-bg-primary);
+}
+
+.main {
+  padding: var(--spacing-md) var(--spacing-md);
+  padding-bottom: calc(80px + var(--spacing-lg));
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  text-align: center;
+  padding: var(--spacing-lg) 0;
+}
+
+.crownIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, #FFC800 0%, #FF9600 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto var(--spacing-md);
+  box-shadow: 0 8px 24px rgba(255, 150, 0, 0.4);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+}
+
+.planCard {
+  position: relative;
+  border: 2px solid var(--color-border-light);
+  transition: all var(--transition-fast);
+}
+
+.premiumCard {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, rgba(88, 204, 2, 0.05) 0%, rgba(28, 176, 246, 0.05) 100%);
+}
+
+.premiumBadge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  color: white;
+  padding: 4px 16px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.5px;
+}
+
+.planHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.planName {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.planPrice {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.priceAmount {
+  font-size: 32px;
+}
+
+.priceCurrency {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.planNote {
+  font-size: 13px;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+.featuresList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.checkIcon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.actionSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.subscribeButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #FFC800 0%, #FF9600 100%);
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #E68600, 0 8px 16px rgba(255, 150, 0, 0.4);
+  transition: all var(--transition-fast);
+}
+
+.subscribeButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 0 #E68600, 0 12px 24px rgba(255, 150, 0, 0.5);
+}
+
+.subscribeButton:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #E68600, 0 4px 8px rgba(255, 150, 0, 0.3);
+}
+
+.subscribeButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.restoreButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.restoreButton:hover {
+  color: var(--color-text-primary);
+}
+
+.securityNote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  padding: var(--spacing-sm) 0;
+}
+
+.securityNote svg {
+  color: var(--color-primary);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.spinnerSmall {
+  animation: spin 1s linear infinite;
+}

@@ -5,30 +5,57 @@ import { LearnPage } from './pages/LearnPage';
 import { ExercisePage } from './pages/ExercisePage';
 import { GrammarPage } from './pages/GrammarPage';
 import { CardReviewPage } from './pages/CardReviewPage';
+import { PaywallPage } from './pages/PaywallPage';
+import { SubscriptionPage } from './pages/SubscriptionPage';
 import { AboutPage } from './pages/AboutPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { LoadingScreen } from './components/LoadingScreen';
 import './styles/globals.css';
 
 function AppContent() {
-  const { hasOnboarded, theme } = useAppStore();
+  const { hasOnboarded, theme, setPremium } = useAppStore();
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-      (window as any).Telegram.WebApp.ready();
-      (window as any).Telegram.WebApp.expand();
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
     }
   }, []);
+
+  // Check subscription status on load
+  useEffect(() => {
+    const checkSubscription = async () => {
+      const tg = (window as any).Telegram?.WebApp;
+      const telegramId = tg?.initDataUnsafe?.user?.id;
+
+      if (!telegramId) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/check-subscription?telegramId=${telegramId}`);
+        const data = await response.json();
+        console.log('Subscription check on load:', data);
+
+        if (data.isPremium) {
+          setPremium(true);
+        }
+      } catch (error) {
+        console.error('Subscription check error:', error);
+      } finally {
+        setTimeout(() => setIsLoading(false), 2000);
+      }
+    };
+
+    checkSubscription();
+  }, [setPremium]);
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -44,6 +71,8 @@ function AppContent() {
       <Route path="/card" element={<CardReviewPage />} />
       <Route path="/exercise" element={<ExercisePage />} />
       <Route path="/grammar" element={<GrammarPage />} />
+      <Route path="/paywall" element={<PaywallPage />} />
+      <Route path="/subscription" element={<SubscriptionPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

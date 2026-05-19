@@ -29,12 +29,13 @@ interface AppState {
   exerciseResults: ExerciseResult[];
   completedGrammar: string[];
   streakFreezes: number;
+  isPremium: boolean;
 
   setTheme: (theme: ThemeMode) => void;
   setOnboarded: (value: boolean) => void;
   setDailyGoal: (goal: number) => void;
-  unlockAllLessons: () => void;
   resetProgress: () => void;
+  setPremium: (value: boolean) => void;
 
   addXP: (amount: number) => void;
   completeLesson: (lessonId: string, score: number, total: number) => void;
@@ -112,14 +113,12 @@ export const useAppStore = create<AppState>()(
       exerciseResults: [],
       completedGrammar: [],
       streakFreezes: 0,
+      isPremium: false,
 
       setTheme: (theme) => set({ theme }),
       setOnboarded: (value) => set({ hasOnboarded: value }),
       setDailyGoal: (goal) => set({ dailyGoal: goal }),
-      unlockAllLessons: () => {
-        const maxXP = 2000;
-        set({ xp: maxXP, level: calculateLevel(maxXP) });
-      },
+      setPremium: (value) => set({ isPremium: value }),
       resetProgress: () => {
         set({ xp: 0, level: 1, completedLessons: [], completedGrammar: [], exerciseResults: [], userProgress: initialProgress, studySessions: [], favorites: [], unlockedAchievements: [] });
       },
@@ -331,11 +330,18 @@ export const useAppStore = create<AppState>()(
       },
 
       getLessonStatus: (lessonId) => {
-        const { completedLessons, xp } = get();
+        const { completedLessons, xp, isPremium } = get();
         if (completedLessons.includes(lessonId)) return 'completed';
 
         const lesson = lessonPath.find(l => l.id === lessonId);
         if (!lesson) return 'locked';
+
+        const isFreeChapter = lesson.lesson <= 3;
+
+        if (!isFreeChapter && !isPremium) {
+          if (xp >= lesson.requiredXP) return 'available';
+          return 'locked';
+        }
 
         if (xp >= lesson.requiredXP) return 'available';
         return 'locked';
