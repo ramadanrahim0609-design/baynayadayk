@@ -11,9 +11,19 @@ export function AboutPage() {
   const { unlockAllLessons, resetProgress } = useAppStore();
 
   const handlePremium = async () => {
+    const tg = (window as any).Telegram?.WebApp;
+
+    if (!tg) {
+      alert('Открой приложение внутри Telegram');
+      return;
+    }
+
     try {
-      const tg = (window as any).Telegram?.WebApp;
-      const telegramId = tg?.initDataUnsafe?.user?.id;
+      tg.ready();
+
+      const telegramId = tg.initDataUnsafe?.user?.id;
+
+      console.log('Telegram WebApp ready, telegramId:', telegramId);
 
       if (!telegramId) {
         alert('Открой приложение внутри Telegram');
@@ -40,7 +50,7 @@ export function AboutPage() {
 
       const invoiceUrl = data.invoice_url || data.invoiceUrl;
       if (invoiceUrl) {
-        tg?.openInvoice(invoiceUrl);
+        tg.openInvoice(invoiceUrl);
       }
     } catch (error) {
       console.error('Premium error:', error);
