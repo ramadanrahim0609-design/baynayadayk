@@ -1,175 +1,134 @@
 import { motion } from 'framer-motion';
-import { Trophy, Flame, Target, BookOpen, Star, Award } from 'lucide-react';
+import { Flame, Zap, Target, BookOpen, Award, Clock, ArrowUp, Trophy, Star } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Navigation } from '../components/Navigation';
 import { Card } from '../components/Card';
 import { ProgressBar } from '../components/ProgressBar';
 import { useAppStore } from '../store/useAppStore';
-import { achievements } from '../data/dictionary';
-import { words } from '../data/dictionary';
+import { words, achievements } from '../data/dictionary';
+import { lessonPath } from '../data/lessons';
 import styles from './StatsPage.module.css';
 
 export function StatsPage() {
-  const { userProgress, unlockedAchievements, studySessions } = useAppStore();
+  const { userProgress, xp, level, completedLessons, studySessions, unlockedAchievements, completedGrammar, getTotalWordsLearned } = useAppStore();
 
-  const learnedWordIds = studySessions.filter(s => s.status === 'known' || s.status === 'reviewing').map(s => s.wordId);
-  const uniqueLearnedWords = new Set(learnedWordIds).size;
-  const totalWords = words.length;
-  const learnedPercentage = (uniqueLearnedWords / totalWords) * 100;
+  const totalWords = getTotalWordsLearned();
+  const totalLessons = lessonPath.length;
+  const completedCount = completedLessons.length;
+  const progressPercent = Math.round((completedCount / totalLessons) * 100);
+  const knownSessions = studySessions.filter(s => s.status === 'known' || s.status === 'reviewing').length;
+  const totalAvailable = words.length;
+  const vocabPercent = Math.round((knownSessions / totalAvailable) * 100);
+  const nextLevelXP = level * 100;
+  const currentLevelXP = xp - (level - 1) * 100;
 
-  const masteredWords = studySessions.filter(s => s.repetitions >= 3).length;
-
-  const stats = [
-    {
-      icon: BookOpen,
-      value: uniqueLearnedWords,
-      label: 'Слов изучено',
-      color: '#2D5BFF',
-    },
-    {
-      icon: Flame,
-      value: userProgress.currentStreak,
-      label: 'Текущая серия',
-      color: '#FF6B35',
-    },
-    {
-      icon: Trophy,
-      value: userProgress.longestStreak,
-      label: 'Лучшая серия',
-      color: '#FFD700',
-    },
-    {
-      icon: Award,
-      value: unlockedAchievements.length,
-      label: 'Достижения',
-      color: '#10B981',
-    },
+  const statsCards = [
+    { icon: BookOpen, label: 'Слов изучено', value: totalWords, total: totalAvailable, color: '#58CC02' },
+    { icon: Trophy, label: 'Уроков пройдено', value: completedCount, total: totalLessons, color: '#FFC800' },
+    { icon: Award, label: 'Грамматика', value: completedGrammar.length, total: achievements.filter(a => a.type === 'words').length + 10, color: '#CE82FF' },
+    { icon: Flame, label: 'Серия дней', value: userProgress.currentStreak, total: userProgress.longestStreak, color: '#FF9600' },
   ];
 
-  const reviewingCount = studySessions.filter(s => s.status === 'reviewing').length;
-  const unknownCount = studySessions.filter(s => s.status === 'unknown').length;
+  const unlockedAchievementsList = achievements.filter(a => unlockedAchievements.includes(a.id));
+  const lockedAchievementsList = achievements.filter(a => !unlockedAchievements.includes(a.id));
 
   return (
     <div className={styles.page}>
-      <Header title="Статистика" />
+      <Header title="Мой прогресс" />
 
       <main className={styles.main}>
+        {/* Level card */}
         <motion.div
-          className={styles.overviewCard}
+          className={styles.levelCard}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={{ duration: 0.5 }}
         >
-          <div className={styles.overviewHeader}>
-            <h2 className={styles.overviewTitle}>Твой прогресс</h2>
-            <p className={styles.overviewSubtitle}>
-              {uniqueLearnedWords} из {totalWords} слов изучено
-            </p>
+          <div className={styles.levelIcon}>
+            <Star size={32} />
           </div>
-
-          <ProgressBar
-            progress={learnedPercentage}
-            size="lg"
-            variant="gradient"
-            showLabel
-            label="Общий прогресс"
-          />
+          <div className={styles.levelInfo}>
+            <span className={styles.levelLabel}>Уровень {level}</span>
+            <span className={styles.levelXP}>{xp} XP всего</span>
+          </div>
+          <div className={styles.levelProgress}>
+            <div className={styles.levelBar}>
+              <motion.div
+                className={styles.levelFill}
+                initial={{ width: 0 }}
+                animate={{ width: `${(currentLevelXP / nextLevelXP) * 100}%` }}
+                transition={{ duration: 0.8 }}
+              />
+            </div>
+            <span className={styles.levelText}>{currentLevelXP}/{nextLevelXP} XP</span>
+          </div>
         </motion.div>
 
+        {/* Stats grid */}
         <div className={styles.statsGrid}>
-          {stats.map((stat, index) => (
+          {statsCards.map((stat, idx) => (
             <motion.div
               key={stat.label}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1 * index }}
+              transition={{ duration: 0.4, delay: 0.1 + idx * 0.08 }}
             >
               <Card className={styles.statCard} padding="md">
-                <div
-                  className={styles.statIcon}
-                  style={{ background: `${stat.color}20`, color: stat.color }}
-                >
-                  <stat.icon size={24} />
+                <div className={styles.statHeader}>
+                  <div className={styles.statIcon} style={{ background: `${stat.color}20`, color: stat.color }}>
+                    <stat.icon size={18} />
+                  </div>
                 </div>
-                <div className={styles.statValue}>{stat.value}</div>
-                <div className={styles.statLabel}>{stat.label}</div>
+                <div className={styles.statBody}>
+                  <span className={styles.statValue}>{stat.value}</span>
+                  <span className={styles.statLabel}>{stat.label}</span>
+                </div>
+                <ProgressBar
+                  progress={(stat.value / stat.total) * 100}
+                  size="sm"
+                  variant="primary"
+                />
               </Card>
             </motion.div>
           ))}
         </div>
 
+        {/* Achievements */}
         <motion.div
-          className={styles.section}
+          className={styles.achievementsSection}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <h3 className={styles.sectionTitle}>
-            <Trophy size={20} />
-            Достижения
-          </h3>
-
-          <div className={styles.achievementsList}>
-            {achievements.map((achievement, index) => {
-              const isUnlocked = unlockedAchievements.includes(achievement.id);
-
-              return (
-                <motion.div
-                  key={achievement.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.05 * index }}
-                >
-                  <Card
-                    className={`${styles.achievementCard} ${isUnlocked ? styles.unlocked : ''}`}
-                    padding="md"
-                  >
-                    <div className={`${styles.achievementIcon} ${isUnlocked ? styles.active : ''}`}>
-                      {achievement.icon}
-                    </div>
-                    <div className={styles.achievementContent}>
-                      <span className={styles.achievementTitle}>{achievement.title}</span>
-                      <span className={styles.achievementDesc}>{achievement.description}</span>
-                    </div>
-                    {isUnlocked && (
-                      <div className={styles.achievementBadge}>
-                        <Star size={16} fill="currentColor" />
-                      </div>
-                    )}
-                  </Card>
-                </motion.div>
-              );
-            })}
+          <h3 className={styles.sectionTitle}>Достижения</h3>
+          <div className={styles.achievementsGrid}>
+            {unlockedAchievementsList.map((achievement, idx) => (
+              <motion.div
+                key={achievement.id}
+                className={styles.achievementBadge}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 + idx * 0.05 }}
+              >
+                <div className={styles.achievementIcon}>
+                  {achievement.icon}
+                </div>
+                <span className={styles.achievementTitle}>{achievement.title}</span>
+              </motion.div>
+            ))}
+            {lockedAchievementsList.slice(0, 4).map((achievement, idx) => (
+              <motion.div
+                key={achievement.id}
+                className={`${styles.achievementBadge} ${styles.achievementLocked}`}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 + (unlockedAchievementsList.length + idx) * 0.05 }}
+              >
+                <div className={styles.achievementIcon}>🔒</div>
+                <span className={styles.achievementTitle}>???</span>
+              </motion.div>
+            ))}
           </div>
-        </motion.div>
-
-        <motion.div
-          className={styles.section}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
-        >
-          <h3 className={styles.sectionTitle}>
-            <Target size={20} />
-            Результаты обучения
-          </h3>
-
-          <Card className={styles.insightCard} padding="lg">
-            <div className={styles.insightItem}>
-              <span className={styles.insightLabel}>Выучено</span>
-              <span className={styles.insightValue}>{masteredWords}</span>
-            </div>
-            <div className={styles.insightDivider} />
-            <div className={styles.insightItem}>
-              <span className={styles.insightLabel}>На повторении</span>
-              <span className={styles.insightValue}>{reviewingCount}</span>
-            </div>
-            <div className={styles.insightDivider} />
-            <div className={styles.insightItem}>
-              <span className={styles.insightLabel}>Нужно повторить</span>
-              <span className={styles.insightValue}>{unknownCount}</span>
-            </div>
-          </Card>
         </motion.div>
       </main>
 

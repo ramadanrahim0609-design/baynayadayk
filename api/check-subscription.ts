@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { checkSubscription } from './utils/yookassa';
 
-export default async function handler(req: Request) {
+export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'GET') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -19,47 +19,9 @@ export default async function handler(req: Request) {
       });
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+    const result = await checkSubscription(parseInt(telegramId));
 
-    if (!supabaseUrl || !supabaseKey) {
-      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { data, error } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('telegram_id', parseInt(telegramId))
-      .eq('status', 'active')
-      .single();
-
-    if (error || !data) {
-      return new Response(JSON.stringify({ isPremium: false }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    const now = new Date();
-    const expiresAt = new Date(data.expires_at);
-
-    if (expiresAt < now) {
-      return new Response(JSON.stringify({ isPremium: false, expired: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    return new Response(JSON.stringify({
-      isPremium: true,
-      expiresAt: data.expires_at,
-      paymentId: data.payment_id,
-    }), {
+    return new Response(JSON.stringify(result), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -71,7 +33,3 @@ export default async function handler(req: Request) {
     });
   }
 }
-
-export const config = {
-  runtime: 'edge',
-};

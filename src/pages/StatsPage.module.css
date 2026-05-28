@@ -1,170 +1,171 @@
 .page {
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--color-bg-primary);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 80px;
 }
 
 .main {
-  padding: var(--spacing-md) var(--spacing-lg);
-  padding-bottom: calc(80px + var(--spacing-lg));
+  flex: 1;
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.levelCard {
+  background: linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-bg-elevated) 100%);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 12px;
 }
 
-.overviewCard {
-  padding: var(--spacing-lg);
+.levelIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-orange) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0 auto;
 }
 
-.overviewHeader {
-  margin-bottom: var(--spacing-lg);
+.levelInfo {
+  text-align: center;
 }
 
-.overviewTitle {
-  font-size: 22px;
+.levelLabel {
+  font-size: 20px;
   font-weight: 800;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-xs);
+  display: block;
 }
 
-.overviewSubtitle {
+.levelXP {
   font-size: 14px;
   color: var(--color-text-secondary);
+}
+
+.levelProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.levelBar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.levelFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-orange) 100%);
+  border-radius: var(--radius-full);
+}
+
+.levelText {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  text-align: right;
+  font-weight: 600;
 }
 
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-md);
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
 .statCard {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.statHeader {
+  display: flex;
   align-items: center;
-  text-align: center;
-  gap: var(--spacing-sm);
+  justify-content: space-between;
 }
 
 .statIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-lg);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+.statBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
 .statValue {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   color: var(--color-text-primary);
 }
 
 .statLabel {
-  font-size: 13px;
-  color: var(--color-text-secondary);
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
 }
 
-.section {
-  margin-top: var(--spacing-sm);
+.achievementsSection {
+  margin-bottom: 24px;
 }
 
 .sectionTitle {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 12px;
 }
 
-.sectionTitle svg {
-  color: var(--color-primary);
-}
-
-.achievementsList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.achievementCard {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  opacity: 0.6;
-  transition: all var(--transition-fast);
-}
-
-.achievementCard.unlocked {
-  opacity: 1;
-}
-
-.achievementIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-lg);
-  background: var(--color-border-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-
-.achievementIcon.active {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-}
-
-.achievementContent {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.achievementTitle {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.achievementDesc {
-  font-size: 13px;
-  color: var(--color-text-secondary);
+.achievementsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 .achievementBadge {
-  color: #FFD700;
-}
-
-.insightCard {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-}
-
-.insightItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
 }
 
-.insightLabel {
-  font-size: 12px;
+.achievementLocked {
+  opacity: 0.5;
+}
+
+.achievementIcon {
+  font-size: 28px;
+}
+
+.achievementTitle {
+  font-size: 10px;
+  font-weight: 600;
   color: var(--color-text-secondary);
-}
-
-.insightValue {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.insightDivider {
-  width: 1px;
-  height: 40px;
-  background: var(--color-border-light);
+  text-align: center;
+  line-height: 1.2;
 }

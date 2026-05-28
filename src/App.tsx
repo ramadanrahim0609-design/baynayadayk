@@ -1,20 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAppStore } from './store/useAppStore';
 import { LearnPage } from './pages/LearnPage';
 import { ExercisePage } from './pages/ExercisePage';
 import { GrammarPage } from './pages/GrammarPage';
 import { CardReviewPage } from './pages/CardReviewPage';
-import { PaywallPage } from './pages/PaywallPage';
-import { SubscriptionPage } from './pages/SubscriptionPage';
+import { StatsPage } from './pages/StatsPage';
+import { SpeechPage } from './pages/SpeechPage';
+import { KnowledgeGraphPage } from './pages/KnowledgeGraphPage';
 import { AboutPage } from './pages/AboutPage';
 import { OnboardingPage } from './pages/OnboardingPage';
-import { LoadingScreen } from './components/LoadingScreen';
 import './styles/globals.css';
 
 function AppContent() {
-  const { hasOnboarded, theme, setPremium } = useAppStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const { hasOnboarded, theme } = useAppStore();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -28,39 +27,6 @@ function AppContent() {
     }
   }, []);
 
-  // Check subscription status on load
-  useEffect(() => {
-    const checkSubscription = async () => {
-      const tg = (window as any).Telegram?.WebApp;
-      const telegramId = tg?.initDataUnsafe?.user?.id;
-
-      if (!telegramId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/check-subscription?telegramId=${telegramId}`);
-        const data = await response.json();
-        console.log('Subscription check on load:', data);
-
-        if (data.isPremium) {
-          setPremium(true);
-        }
-      } catch (error) {
-        console.error('Subscription check error:', error);
-      } finally {
-        setTimeout(() => setIsLoading(false), 2000);
-      }
-    };
-
-    checkSubscription();
-  }, [setPremium]);
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
   if (!hasOnboarded) {
     return <OnboardingPage />;
   }
@@ -71,8 +37,9 @@ function AppContent() {
       <Route path="/card" element={<CardReviewPage />} />
       <Route path="/exercise" element={<ExercisePage />} />
       <Route path="/grammar" element={<GrammarPage />} />
-      <Route path="/paywall" element={<PaywallPage />} />
-      <Route path="/subscription" element={<SubscriptionPage />} />
+      <Route path="/stats" element={<StatsPage />} />
+      <Route path="/speech" element={<SpeechPage />} />
+      <Route path="/knowledge" element={<KnowledgeGraphPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

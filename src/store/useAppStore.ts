@@ -30,6 +30,8 @@ interface AppState {
   completedGrammar: string[];
   streakFreezes: number;
   isPremium: boolean;
+  dailyRewardClaimed: boolean;
+  lastDailyRewardDate: string | null;
 
   setTheme: (theme: ThemeMode) => void;
   setOnboarded: (value: boolean) => void;
@@ -56,6 +58,8 @@ interface AppState {
   getTodayProgress: () => { learned: number; goal: number; percentage: number };
   getLessonStatus: (lessonId: string) => 'locked' | 'available' | 'completed';
   getTotalWordsLearned: () => number;
+  claimDailyReward: () => number;
+  canClaimDailyReward: () => boolean;
 }
 
 const calculateNextReview = (session: StudySession, status: 'known' | 'unknown'): StudySession => {
@@ -114,6 +118,8 @@ export const useAppStore = create<AppState>()(
       completedGrammar: [],
       streakFreezes: 0,
       isPremium: false,
+      dailyRewardClaimed: false,
+      lastDailyRewardDate: null,
 
       setTheme: (theme) => set({ theme }),
       setOnboarded: (value) => set({ hasOnboarded: value }),
@@ -336,12 +342,7 @@ export const useAppStore = create<AppState>()(
         const lesson = lessonPath.find(l => l.id === lessonId);
         if (!lesson) return 'locked';
 
-        const isFreeChapter = lesson.lesson <= 3;
-
-        if (!isFreeChapter && !isPremium) {
-          if (xp >= lesson.requiredXP) return 'available';
-          return 'locked';
-        }
+        if (isPremium) return 'available';
 
         if (xp >= lesson.requiredXP) return 'available';
         return 'locked';
@@ -353,6 +354,50 @@ export const useAppStore = create<AppState>()(
           studySessions.filter(s => s.status === 'known' || s.status === 'reviewing').map(s => s.wordId)
         );
         return uniqueWords.size;
+      },
+
+      canClaimDailyReward: () => {
+        const { lastDailyRewardDate } = get();
+        const today = startOfDay(new Date()).toISOString();
+        return lastDailyRewardDate !== today;
+      },
+
+      claimDailyReward: () => {
+        const { lastDailyRewardDate } = get();
+        const today = startOfDay(new Date()).toISOString();
+        const yesterday = startOfDay(new Date(Date.now() - 24 * 60 * 60 * 1000)).toISOString();
+
+        if (lastDailyRewardDate === today) return 0;
+
+        let bonus = 20;
+        if (lastDailyRewardDate === yesterday) {
+          const { userProgress } = get();
+          const newStreak = userProgress.currentStreak + 1;
+          const streakBonus = Math.min(newStreak * 5, 50);
+          bonus += streakBonus;
+          set({
+            userProgress: {
+              ...userProgress,
+              currentStreak: newStreak,
+              longestStreak: Math.max(userProgress.longestStreak, newStreak),
+              lastStudyDate: new Date().toISOString(),
+            },
+          });
+        } else if (lastDailyRewardDate !== today) {
+          const { userProgress } = get();
+          set({
+            userProgress: {
+              ...userProgress,
+              currentStreak: 1,
+              lastStudyDate: new Date().toISOString(),
+            },
+          });
+        }
+
+        set({ lastDailyRewardDate: today, dailyRewardClaimed: true });
+        get().addXP(bonus);
+        get().checkAchievements();
+        return bonus;
       },
     }),
     {

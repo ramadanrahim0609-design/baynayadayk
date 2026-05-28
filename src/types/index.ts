@@ -6,6 +6,7 @@ export interface Word {
   category: string;
   lesson: number;
   audioUrl?: string;
+  emoji?: string;
 }
 
 export interface Category {

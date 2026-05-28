@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, BookOpen, Check, Volume2 } from 'lucide-react';
+import { ChevronRight, Check, Volume2, ArrowLeft } from 'lucide-react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { Navigation } from '../components/Navigation';
@@ -15,9 +15,7 @@ export function GrammarPage() {
   const navigate = useNavigate();
   const lessonParam = searchParams.get('lesson');
   const { completeGrammar, completedGrammar } = useAppStore();
-
   const [selectedRule, setSelectedRule] = useState<GrammarRule | null>(null);
-  const [expandedTips, setExpandedTips] = useState(false);
 
   const filteredRules = lessonParam
     ? grammarRules.filter(r => r.lesson === parseInt(lessonParam))
@@ -29,10 +27,7 @@ export function GrammarPage() {
     return acc;
   }, {} as Record<string, GrammarRule[]>);
 
-  const handleRuleClick = (rule: GrammarRule) => {
-    setSelectedRule(rule);
-    setExpandedTips(false);
-  };
+  const handleRuleClick = (rule: GrammarRule) => setSelectedRule(rule);
 
   const handleComplete = () => {
     if (selectedRule) {
@@ -50,6 +45,14 @@ export function GrammarPage() {
 
   if (selectedRule) {
     const isCompleted = completedGrammar.includes(selectedRule.id);
+    const categoryColors: Record<string, string> = {
+      'Приветствия': '#58CC02',
+      'Семья': '#1CB0F6',
+      'Жильё': '#FF9600',
+      'Еда': '#CE82FF',
+      'Молитвы': '#FFC800',
+    };
+    const ruleColor = categoryColors[selectedRule.category] || '#58CC02';
 
     return (
       <div className={styles.page}>
@@ -62,9 +65,14 @@ export function GrammarPage() {
             transition={{ duration: 0.4 }}
           >
             <Card className={styles.ruleHeader} padding="lg">
+              <div className={styles.ruleIconLarge} style={{ background: ruleColor }}>
+                📖
+              </div>
               <h2 className={styles.ruleTitle}>{selectedRule.title}</h2>
               <p className={styles.ruleTitleAr}>{selectedRule.titleAr}</p>
-              <span className={styles.ruleCategory}>{selectedRule.category}</span>
+              <span className={styles.ruleCategory} style={{ background: `${ruleColor}20`, color: ruleColor }}>
+                {selectedRule.category}
+              </span>
             </Card>
           </motion.div>
 
@@ -74,7 +82,7 @@ export function GrammarPage() {
             transition={{ duration: 0.4, delay: 0.1 }}
           >
             <Card className={styles.explanationCard} padding="lg">
-              <h3 className={styles.sectionTitle}>Объяснение</h3>
+              <h3 className={styles.sectionTitle}>Коротко</h3>
               <p className={styles.explanationText}>{selectedRule.explanation}</p>
             </Card>
           </motion.div>
@@ -88,73 +96,37 @@ export function GrammarPage() {
               <h3 className={styles.sectionTitle}>Примеры</h3>
               <div className={styles.examplesList}>
                 {selectedRule.examples.map((example, idx) => (
-                  <div key={idx} className={styles.exampleItem}>
+                  <motion.div
+                    key={idx}
+                    className={styles.exampleItem}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.1 }}
+                  >
                     <div className={styles.exampleArabic}>
                       <span className={styles.arabicText}>{example.arabic}</span>
-                      <button
-                        className={styles.audioButton}
-                        onClick={() => playAudio(example.arabic)}
-                      >
+                      <button className={styles.audioBtn} onClick={() => playAudio(example.arabic)}>
                         <Volume2 size={16} />
                       </button>
                     </div>
                     <span className={styles.exampleTranslit}>{example.transliteration}</span>
                     <span className={styles.exampleTranslation}>{example.translation}</span>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </Card>
           </motion.div>
 
-          {selectedRule.tips && selectedRule.tips.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-            >
-              <Card
-                className={styles.tipsCard}
-                padding="lg"
-                onClick={() => setExpandedTips(!expandedTips)}
-              >
-                <div className={styles.tipsHeader}>
-                  <h3 className={styles.sectionTitle}>Советы</h3>
-                  <ChevronRight
-                    size={20}
-                    className={`${styles.chevron} ${expandedTips ? styles.chevronOpen : ''}`}
-                  />
-                </div>
-                <AnimatePresence>
-                  {expandedTips && (
-                    <motion.ul
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className={styles.tipsList}
-                    >
-                      {selectedRule.tips.map((tip, idx) => (
-                        <li key={idx} className={styles.tipItem}>
-                          <span className={styles.tipBullet}>•</span>
-                          {tip}
-                        </li>
-                      ))}
-                    </motion.ul>
-                  )}
-                </AnimatePresence>
-              </Card>
-            </motion.div>
-          )}
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
             <Button
               fullWidth
               size="lg"
               onClick={handleComplete}
-              icon={isCompleted ? <Check size={20} /> : <BookOpen size={20} />}
+              icon={isCompleted ? <Check size={20} /> : undefined}
               variant={isCompleted ? 'success' : 'primary'}
             >
               {isCompleted ? 'Изучено ✓' : 'Отметить как изученное'}
@@ -169,15 +141,23 @@ export function GrammarPage() {
 
   return (
     <div className={styles.page}>
-      <Header showBack title="Грамматика" />
+      <Header title="Грамматика" />
 
       <main className={styles.main}>
+        <motion.p
+          className={styles.subtitle}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          Короткие правила с примерами
+        </motion.p>
+
         {Object.entries(groupedRules).map(([category, rules], catIdx) => (
           <motion.div
             key={category}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: catIdx * 0.1 }}
+            transition={{ duration: 0.4, delay: catIdx * 0.08 }}
             className={styles.categorySection}
           >
             <h3 className={styles.categoryTitle}>{category}</h3>
@@ -189,23 +169,23 @@ export function GrammarPage() {
                     key={rule.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    transition={{ duration: 0.3, delay: idx * 0.04 }}
                   >
                     <Card
-                      className={`${styles.ruleCard} ${isCompleted ? styles.completed : ''}`}
+                      className={`${styles.ruleCard} ${isCompleted ? styles.ruleCompleted : ''}`}
                       padding="md"
                       onClick={() => handleRuleClick(rule)}
                     >
                       <div className={styles.ruleInfo}>
                         <span className={styles.ruleIcon}>
-                          {isCompleted ? '✓' : '📖'}
+                          {isCompleted ? '✅' : '📖'}
                         </span>
                         <div className={styles.ruleDetails}>
                           <span className={styles.ruleName}>{rule.title}</span>
                           <span className={styles.ruleNameAr}>{rule.titleAr}</span>
                         </div>
                       </div>
-                      <ChevronRight size={20} className={styles.arrow} />
+                      <ChevronRight size={18} className={styles.arrow} />
                     </Card>
                   </motion.div>
                 );

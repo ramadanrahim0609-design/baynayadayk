@@ -17,20 +17,14 @@ export function Card({
   padding = 'md',
   onClick,
 }: CardProps) {
-  const Component = onClick ? motion.div : 'div';
-  const motionProps = onClick ? {
-    whileTap: { scale: 0.98 },
-    whileHover: { scale: 1.02 },
-    transition: { duration: 0.2 }
-  } : {};
-
   return (
-    <Component
-      className={`${styles.card} ${styles[variant]} ${styles[`padding-${padding}`]} ${className}`}
+    <motion.div
+      className={`${styles.card} ${styles[variant]} ${styles[`padding-${padding}`]} ${onClick ? styles.clickable : ''} ${className}`}
       onClick={onClick}
-      {...motionProps}
+      whileHover={onClick ? { y: -2 } : {}}
+      whileTap={onClick ? { scale: 0.98 } : {}}
     >
       {children}
-    </Component>
+    </motion.div>
   );
 }

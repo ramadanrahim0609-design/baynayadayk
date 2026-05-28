@@ -3,7 +3,7 @@ import styles from './ProgressBar.module.css';
 
 interface ProgressBarProps {
   progress: number;
-  variant?: 'primary' | 'success' | 'warning' | 'gradient';
+  variant?: 'primary' | 'gradient' | 'accent' | 'rainbow';
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
   label?: string;
@@ -12,7 +12,7 @@ interface ProgressBarProps {
 
 export function ProgressBar({
   progress,
-  variant = 'gradient',
+  variant = 'primary',
   size = 'md',
   showLabel = false,
   label,
@@ -21,21 +21,22 @@ export function ProgressBar({
   const clampedProgress = Math.min(100, Math.max(0, progress));
 
   return (
-    <div className={styles.container}>
-      {showLabel && (
-        <div className={styles.labelContainer}>
-          <span className={styles.label}>{label}</span>
-          <span className={styles.percentage}>{Math.round(clampedProgress)}%</span>
-        </div>
-      )}
+    <div className={`${styles.container} ${styles[size]}`}>
       <div className={`${styles.track} ${styles[size]}`}>
         <motion.div
-          className={`${styles.fill} ${styles[variant]}`}
+          className={`${styles.fill} ${styles[variant]} ${styles[size]}`}
           initial={animated ? { width: 0 } : { width: `${clampedProgress}%` }}
           animate={{ width: `${clampedProgress}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
-        />
+        >
+          {size === 'lg' && clampedProgress > 15 && (
+            <span className={styles.fillText}>{Math.round(clampedProgress)}%</span>
+          )}
+        </motion.div>
       </div>
+      {showLabel && (
+        <span className={styles.label}>{label || `${Math.round(clampedProgress)}%`}</span>
+      )}
     </div>
   );
 }

@@ -1,20 +1,18 @@
-import { ButtonHTMLAttributes, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import styles from './Button.module.css';
 
 interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'success' | 'danger';
+  children: ReactNode;
+  variant?: 'primary' | 'secondary' | 'accent' | 'outline' | 'success' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   icon?: ReactNode;
   iconPosition?: 'left' | 'right';
   fullWidth?: boolean;
   loading?: boolean;
   disabled?: boolean;
-  className?: string;
-  children?: ReactNode;
   onClick?: () => void;
-  type?: 'button' | 'submit' | 'reset';
-  title?: string;
+  type?: 'button' | 'submit';
 }
 
 export function Button({
@@ -25,29 +23,26 @@ export function Button({
   iconPosition = 'left',
   fullWidth = false,
   loading = false,
-  className = '',
-  disabled,
+  disabled = false,
   onClick,
   type = 'button',
-  title,
 }: ButtonProps) {
   return (
     <motion.button
-      className={`${styles.button} ${styles[variant]} ${styles[size]} ${fullWidth ? styles.fullWidth : ''} ${className}`}
-      disabled={disabled || loading}
-      whileTap={{ scale: 0.98 }}
-      whileHover={{ scale: 1.02 }}
+      className={`${styles.button} ${styles[variant]} ${styles[size]} ${fullWidth ? styles.fullWidth : ''} ${loading ? styles.loading : ''}`}
       onClick={onClick}
+      disabled={disabled || loading}
       type={type}
-      title={title}
+      whileTap={!disabled && !loading ? { scale: 0.96, y: 3 } : {}}
+      whileHover={!disabled && !loading ? { scale: 1.02 } : {}}
     >
       {loading ? (
-        <span className={styles.spinner} />
+        <div className={styles.spinner} />
       ) : (
         <>
-          {icon && iconPosition === 'left' && <span className={styles.icon}>{icon}</span>}
-          {children && <span>{children}</span>}
-          {icon && iconPosition === 'right' && <span className={styles.icon}>{icon}</span>}
+          {icon && iconPosition === 'left' && <span className={styles.iconLeft}>{icon}</span>}
+          <span className={styles.text}>{children}</span>
+          {icon && iconPosition === 'right' && <span className={styles.iconRight}>{icon}</span>}
         </>
       )}
     </motion.button>

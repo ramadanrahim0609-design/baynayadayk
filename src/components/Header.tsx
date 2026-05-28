@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, Moon, Sun, Flame, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import styles from './Header.module.css';
@@ -10,6 +10,7 @@ interface HeaderProps {
   showBack?: boolean;
   rightElement?: ReactNode;
   transparent?: boolean;
+  showStats?: boolean;
 }
 
 export function Header({
@@ -17,9 +18,10 @@ export function Header({
   showBack = false,
   rightElement,
   transparent = false,
+  showStats = false,
 }: HeaderProps) {
   const navigate = useNavigate();
-  const { theme, setTheme } = useAppStore();
+  const { theme, setTheme, xp, userProgress } = useAppStore();
 
   return (
     <motion.header
@@ -40,6 +42,19 @@ export function Header({
         )}
         {title && <h1 className={styles.title}>{title}</h1>}
       </div>
+
+      {showStats && (
+        <div className={styles.stats}>
+          <div className={styles.statItem}>
+            <Flame size={16} className={styles.flameIcon} />
+            <span className={styles.statValue}>{userProgress.currentStreak}</span>
+          </div>
+          <div className={styles.statItem}>
+            <Zap size={16} className={styles.xpIcon} />
+            <span className={styles.statValue}>{xp}</span>
+          </div>
+        </div>
+      )}
 
       <div className={styles.right}>
         {rightElement}

@@ -1,15 +1,13 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Send, Heart, Star, RotateCcw, Crown } from 'lucide-react';
+import { BookOpen, Send, Heart, Star, RotateCcw } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Navigation } from '../components/Navigation';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { useAppStore } from '../store/useAppStore';
-import { useNavigate } from 'react-router-dom';
 import styles from './AboutPage.module.css';
 
 export function AboutPage() {
-  const navigate = useNavigate();
   const { resetProgress } = useAppStore();
 
   return (
@@ -137,19 +135,7 @@ export function AboutPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <button className={styles.premiumButton} onClick={() => navigate('/subscription')}>
-            <Crown size={24} />
-            <span>⭐ Получить Premium</span>
-          </button>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.35 }}
-          className={styles.actionButtons}
         >
           <Button
             variant="ghost"

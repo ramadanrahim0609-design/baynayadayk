@@ -1,6 +1,6 @@
 import { createPayment } from './utils/yookassa';
 
-export default async function handler(req: Request) {
+export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -40,7 +40,3 @@ export default async function handler(req: Request) {
     });
   }
 }
-
-export const config = {
-  runtime: 'edge',
-};

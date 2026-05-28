@@ -10,18 +10,10 @@ interface CreatePaymentParams {
   currency: string;
 }
 
-interface PaymentResult {
-  id: string;
-  confirmation: {
-    type: string;
-    confirmation_url: string;
-  };
-}
-
-export async function createPayment({ telegramId, amount, currency }: CreatePaymentParams): Promise<PaymentResult> {
+export async function createPayment({ telegramId, amount, currency }: CreatePaymentParams) {
   const auth = Buffer.from(`${YOOKASSA_SHOP_ID}:${YOOKASSA_SECRET_KEY}`).toString('base64');
 
-  const idempotenceKey = `${telegramId}-${Date.now()}`;
+  const idempotenceKey = `payment-${telegramId}-${Date.now()}`;
 
   const response = await fetch(YOOKASSA_API_URL, {
     method: 'POST',
@@ -55,14 +47,14 @@ export async function createPayment({ telegramId, amount, currency }: CreatePaym
   return response.json();
 }
 
-interface HandlePaymentParams {
+export async function handlePaymentSucceeded(params: {
   telegramId: number;
   paymentId: string;
   amount: string;
   currency: string;
-}
+}) {
+  const { telegramId, paymentId, amount, currency } = params;
 
-export async function handlePaymentSucceeded({ telegramId, paymentId, amount, currency }: HandlePaymentParams) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
@@ -95,4 +87,39 @@ export async function handlePaymentSucceeded({ telegramId, paymentId, amount, cu
   }
 
   console.log(`Premium activated for telegramId: ${telegramId}, expires: ${expiresAt.toISOString()}`);
+}
+
+export async function checkSubscription(telegramId: number) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase configuration missing');
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('telegram_id', telegramId)
+    .eq('status', 'active')
+    .single();
+
+  if (error || !data) {
+    return { isPremium: false };
+  }
+
+  const now = new Date();
+  const expiresAt = new Date(data.expires_at);
+
+  if (expiresAt < now) {
+    return { isPremium: false, expired: true };
+  }
+
+  return {
+    isPremium: true,
+    expiresAt: data.expires_at,
+    paymentId: data.payment_id,
+  };
 }

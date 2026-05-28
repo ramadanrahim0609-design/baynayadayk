@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, Heart, FlipHorizontal } from 'lucide-react';
+import { Volume2, Heart, Check, X } from 'lucide-react';
 import { Word } from '../types';
 import styles from './WordCard.module.css';
 
 interface WordCardProps {
   word: Word;
-  isFavorite: boolean;
-  onToggleFavorite: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
   onMarkKnown?: () => void;
   onMarkUnknown?: () => void;
   showActions?: boolean;
@@ -15,7 +15,7 @@ interface WordCardProps {
 
 export function WordCard({
   word,
-  isFavorite,
+  isFavorite = false,
   onToggleFavorite,
   onMarkKnown,
   onMarkUnknown,
@@ -23,95 +23,121 @@ export function WordCard({
 }: WordCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const startX = useRef(0);
 
-  const playAudio = (e: React.MouseEvent) => {
+  const playAudio = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isPlaying) return;
     setIsPlaying(true);
-
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(word.arabic);
     utterance.lang = 'ar-SA';
     utterance.rate = 0.8;
-
     utterance.onend = () => setIsPlaying(false);
     utterance.onerror = () => setIsPlaying(false);
+    window.speechSynthesis.speak(utterance);
+  }, [word.arabic, isPlaying]);
 
-    speechSynthesis.speak(utterance);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    startX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX.current - endX;
+    if (Math.abs(diff) > 50 && !isFlipped) {
+      setIsFlipped(true);
+    }
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.cardWrapper} onClick={() => setIsFlipped(!isFlipped)}>
+    <div
+      className={styles.wrapper}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <motion.div
+        className={styles.card}
+        onClick={() => setIsFlipped(!isFlipped)}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.4, type: 'spring', stiffness: 120 }}
+      >
         <AnimatePresence mode="wait">
           {!isFlipped ? (
             <motion.div
               key="front"
-              className={`${styles.card} ${styles.front}`}
-              initial={{ rotateY: 0 }}
-              exit={{ rotateY: -90, opacity: 0 }}
-              transition={{ duration: 0.3 }}
+              className={styles.face}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{ background: 'linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-bg-elevated) 100%)' }}
             >
               <div className={styles.arabicText}>{word.arabic}</div>
-              <div className={styles.transliteration}>{word.transliteration}</div>
-
-              <div className={styles.actions}>
-                <motion.button
-                  className={`${styles.iconButton} ${isPlaying ? styles.playing : ''}`}
-                  onClick={playAudio}
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <Volume2 size={24} />
-                </motion.button>
-              </div>
-
+              <motion.button
+                className={`${styles.audioButton} ${isPlaying ? styles.playing : ''}`}
+                onClick={playAudio}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Volume2 size={22} />
+                <span className={styles.audioLabel}>{isPlaying ? '...' : 'Слушать'}</span>
+              </motion.button>
               <div className={styles.flipHint}>
-                <FlipHorizontal size={16} />
                 <span>Нажми, чтобы увидеть перевод</span>
               </div>
             </motion.div>
           ) : (
             <motion.div
               key="back"
-              className={`${styles.card} ${styles.back}`}
-              initial={{ rotateY: 90, opacity: 0 }}
-              animate={{ rotateY: 0, opacity: 1 }}
-              transition={{ duration: 0.3 }}
+              className={`${styles.face} ${styles.backFace}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             >
+              <div className={styles.emojiWrapper}>
+                <span className={styles.emoji}>{word.emoji || '📖'}</span>
+              </div>
               <div className={styles.translation}>{word.translation}</div>
+              <div className={styles.transliteration}>{word.transliteration}</div>
               <div className={styles.category}>{word.category}</div>
 
-              <motion.button
-                className={`${styles.favoriteButton} ${isFavorite ? styles.favorited : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleFavorite();
-                }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <Heart size={24} fill={isFavorite ? 'currentColor' : 'none'} />
-              </motion.button>
+              {showActions && (
+                <div className={styles.actions}>
+                  {onToggleFavorite && (
+                    <motion.button
+                      className={`${styles.actionBtn} ${isFavorite ? styles.favoriteActive : ''}`}
+                      onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+                    </motion.button>
+                  )}
+                  {onMarkUnknown && (
+                    <motion.button
+                      className={`${styles.actionBtn} ${styles.unknownBtn}`}
+                      onClick={(e) => { e.stopPropagation(); onMarkUnknown(); }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <X size={18} />
+                    </motion.button>
+                  )}
+                  {onMarkKnown && (
+                    <motion.button
+                      className={`${styles.actionBtn} ${styles.knownBtn}`}
+                      onClick={(e) => { e.stopPropagation(); onMarkKnown(); }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Check size={18} />
+                    </motion.button>
+                  )}
+                </div>
+              )}
+              <div className={styles.flipHint}>
+                <span>Нажми, чтобы вернуться</span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {showActions && onMarkKnown && onMarkUnknown && (
-        <div className={styles.responseButtons}>
-          <motion.button
-            className={`${styles.responseBtn} ${styles.unknownBtn}`}
-            onClick={onMarkUnknown}
-            whileTap={{ scale: 0.95 }}
-          >
-            Не знаю
-          </motion.button>
-          <motion.button
-            className={`${styles.responseBtn} ${styles.knownBtn}`}
-            onClick={onMarkKnown}
-            whileTap={{ scale: 0.95 }}
-          >
-            Знаю
-          </motion.button>
-        </div>
-      )}
+      </motion.div>
     </div>
   );
 }
