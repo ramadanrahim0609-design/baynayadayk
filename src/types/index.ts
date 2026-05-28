@@ -16,6 +16,7 @@ export interface Category {
   icon: string;
   wordCount: number;
   lesson: number;
+  emoji?: string;
 }
 
 export interface StudySession {
@@ -47,6 +48,7 @@ export interface Achievement {
   unlockedAt?: string;
   requirement: number;
   type: 'words' | 'streak' | 'days' | 'accuracy';
+  emoji?: string;
 }
 
 export interface DailyQuote {
@@ -54,6 +56,7 @@ export interface DailyQuote {
   text: string;
   textAr: string;
   source: string;
+  emoji?: string;
 }
 
 export type ThemeMode = 'light' | 'dark';

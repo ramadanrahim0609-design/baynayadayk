@@ -13,6 +13,7 @@ interface ButtonProps {
   disabled?: boolean;
   onClick?: () => void;
   type?: 'button' | 'submit';
+  className?: string;
 }
 
 export function Button({
@@ -26,10 +27,11 @@ export function Button({
   disabled = false,
   onClick,
   type = 'button',
+  className = '',
 }: ButtonProps) {
   return (
     <motion.button
-      className={`${styles.button} ${styles[variant]} ${styles[size]} ${fullWidth ? styles.fullWidth : ''} ${loading ? styles.loading : ''}`}
+      className={`${styles.button} ${styles[variant]} ${styles[size]} ${fullWidth ? styles.fullWidth : ''} ${loading ? styles.loading : ''} ${className}`}
       onClick={onClick}
       disabled={disabled || loading}
       type={type}

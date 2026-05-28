@@ -228,6 +228,23 @@ export function ExercisePage() {
     }
   }, [currentQuestion, showResult, builtWord, markWordKnown, markWordUnknown]);
 
+  const handleNext = useCallback(() => {
+    const finalCorrect = isCorrect ? 1 : 0;
+    if (currentIndex < questions.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+      setSelectedAnswer(null);
+      setIsCorrect(null);
+      setShowResult(false);
+      setBuiltWord([]);
+      if (currentQuestion?.type === 'build' && currentQuestion?.scrambledLetters) {
+        setBuildLetters([...currentQuestion.scrambledLetters].sort(() => Math.random() - 0.5));
+      }
+    } else {
+      completeLesson(lessonId || '', score + finalCorrect, questions.length);
+      setIsComplete(true);
+    }
+  }, [currentIndex, questions.length, score, isCorrect, lessonId, completeLesson, currentQuestion]);
+
   const handleMatchClick = useCallback((side: 'arabic' | 'translation', index: number) => {
     if (!matchWords[index]) return;
     const alreadyMatched = matchedIndices.some(m => m[side] === index);
@@ -280,23 +297,6 @@ export function ExercisePage() {
       setIsComplete(true);
     }
   }, [hearts]);
-
-  const handleNext = useCallback(() => {
-    const finalCorrect = isCorrect ? 1 : 0;
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(prev => prev + 1);
-      setSelectedAnswer(null);
-      setIsCorrect(null);
-      setShowResult(false);
-      setBuiltWord([]);
-      if (currentQuestion?.type === 'build' && currentQuestion?.scrambledLetters) {
-        setBuildLetters([...currentQuestion.scrambledLetters].sort(() => Math.random() - 0.5));
-      }
-    } else {
-      completeLesson(lessonId || '', score + finalCorrect, questions.length);
-      setIsComplete(true);
-    }
-  }, [currentIndex, questions.length, score, isCorrect, lessonId, completeLesson, currentQuestion]);
 
   useEffect(() => {
     if (currentQuestion?.type === 'build' && currentQuestion?.scrambledLetters) {
