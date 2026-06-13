@@ -7,7 +7,6 @@ import { GrammarPage } from './pages/GrammarPage';
 import { CardReviewPage } from './pages/CardReviewPage';
 import { StatsPage } from './pages/StatsPage';
 import { SpeechPage } from './pages/SpeechPage';
-import { KnowledgeGraphPage } from './pages/KnowledgeGraphPage';
 import { AboutPage } from './pages/AboutPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import './styles/globals.css';
@@ -39,7 +38,6 @@ function AppContent() {
       <Route path="/grammar" element={<GrammarPage />} />
       <Route path="/stats" element={<StatsPage />} />
       <Route path="/speech" element={<SpeechPage />} />
-      <Route path="/knowledge" element={<KnowledgeGraphPage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

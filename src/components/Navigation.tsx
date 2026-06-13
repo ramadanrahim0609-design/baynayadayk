@@ -1,12 +1,11 @@
 import { motion } from 'framer-motion';
-import { Home, BookOpen, BarChart3, Info, Network } from 'lucide-react';
+import { Home, BookOpen, BarChart3, Info } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './Navigation.module.css';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Главная' },
   { path: '/grammar', icon: BookOpen, label: 'Грамматика' },
-  { path: '/knowledge', icon: Network, label: 'Карта' },
   { path: '/stats', icon: BarChart3, label: 'Прогресс' },
   { path: '/about', icon: Info, label: 'О нас' },
 ];

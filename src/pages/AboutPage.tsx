@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { BookOpen, Send, Heart, Star, RotateCcw } from 'lucide-react';
+import { BookOpen, Send, Heart, Star, Lock, Unlock } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Navigation } from '../components/Navigation';
 import { Card } from '../components/Card';
@@ -8,7 +8,7 @@ import { useAppStore } from '../store/useAppStore';
 import styles from './AboutPage.module.css';
 
 export function AboutPage() {
-  const { resetProgress } = useAppStore();
+  const { setPremium, isPremium } = useAppStore();
 
   return (
     <div className={styles.page}>
@@ -138,13 +138,13 @@ export function AboutPage() {
           transition={{ duration: 0.5, delay: 0.35 }}
         >
           <Button
-            variant="ghost"
+            variant={isPremium ? 'success' : 'accent'}
             size="lg"
-            icon={<RotateCcw size={18} />}
-            onClick={resetProgress}
+            icon={isPremium ? <Unlock size={18} /> : <Lock size={18} />}
+            onClick={() => setPremium(true)}
             fullWidth
           >
-            Сбросить прогресс
+            {isPremium ? 'Все уроки открыты' : 'Открыть все уроки'}
           </Button>
         </motion.div>
 
