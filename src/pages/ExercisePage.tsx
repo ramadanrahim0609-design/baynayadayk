@@ -38,7 +38,7 @@ function scrambleWord(arabic: string): string[] {
     const j = Math.floor(Math.random() * (i + 1));
     [letters[i], letters[j]] = [letters[j], letters[i]];
   }
-  return letters.slice(0, 7);
+  return letters;
 }
 
 function playArabic(text: string) {
@@ -63,8 +63,8 @@ export function ExercisePage() {
   const [isComplete, setIsComplete] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [lessonTitle, setLessonTitle] = useState('Упражнения');
-  const [buildLetters, setBuildLetters] = useState<string[]>([]);
-  const [builtWord, setBuiltWord] = useState<string[]>([]);
+  const [buildLetters, setBuildLetters] = useState<{ letter: string; id: number }[]>([]);
+  const [builtWord, setBuiltWord] = useState<{ letter: string; id: number }[]>([]);
   const [streak, setStreak] = useState(0);
   const [hearts, setHearts] = useState(3);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -84,56 +84,55 @@ export function ExercisePage() {
     if (!lesson || !lesson.wordIds) { navigate('/'); return; }
     setLessonTitle(lesson.title);
 
-    const lessonWords = getWordsByIds(lesson.wordIds).sort((a, b) => parseInt(a.id) - parseInt(b.id)).slice(0, 10);
+    const lessonWords = getWordsByIds(lesson.wordIds).sort((a, b) => parseInt(a.id) - parseInt(b.id));
 
-    const types: ExerciseType[] = ['choose', 'match', 'listen', 'build', 'choose', 'match', 'listen', 'build', 'choose', 'listen'];
     const generated: Question[] = [];
+
+    const types: ExerciseType[] = ['choose', 'listen', 'build', 'choose', 'build', 'listen', 'choose', 'build', 'listen', 'choose'];
     let wordIdx = 0;
 
+    const matchChunkSize = 4;
+    const matchIndices: number[] = [];
+    const nonMatchWords: typeof lessonWords = [];
+
     for (let i = 0; i < lessonWords.length; i++) {
-      const word = lessonWords[i];
+      if (i % matchChunkSize === 2 && i + matchChunkSize <= lessonWords.length) {
+        matchIndices.push(i);
+      } else {
+        nonMatchWords.push(lessonWords[i]);
+      }
+    }
+
+    for (const startIdx of matchIndices) {
+      const matchGroup = lessonWords.slice(startIdx, startIdx + matchChunkSize);
+      if (matchGroup.length >= 3) {
+        const pairs: MatchPair[] = matchGroup.map(w => ({
+          arabic: w.arabic,
+          translation: w.translation,
+          wordId: w.id,
+        }));
+        generated.push({
+          type: 'match',
+          word: matchGroup[0],
+          options: [],
+          correctAnswer: '',
+          prompt: 'Сопоставь слово с переводом',
+          matchPairs: pairs,
+        });
+      }
+    }
+
+    for (let i = 0; i < nonMatchWords.length; i++) {
+      const word = nonMatchWords[i];
       const otherWords = words.filter(w => w.id !== word.id && w.category === word.category).sort(() => Math.random() - 0.5).slice(0, 3);
       if (otherWords.length < 3) {
-        const fallback = words.filter(w => w.id !== word.id).sort(() => Math.random() - 0.5).slice(0, 3);
+        const fallback = words.filter(w => w.id !== word.id).sort(() => Math.random() - 0.5).slice(0, 3 - otherWords.length);
         otherWords.push(...fallback);
       }
       const options = [...otherWords, word].sort(() => Math.random() - 0.5);
 
-      const type = types[i % types.length];
-
-      if (type === 'match') {
-        const matchGroup = lessonWords.slice(wordIdx, wordIdx + 4);
-        wordIdx += 4;
-        if (matchGroup.length >= 3) {
-          const pairs: MatchPair[] = matchGroup.map(w => ({
-            arabic: w.arabic,
-            translation: w.translation,
-            wordId: w.id,
-          }));
-          generated.push({
-            type: 'match',
-            word,
-            options: [],
-            correctAnswer: '',
-            prompt: 'Сопоставь слово с переводом',
-          });
-          continue;
-        }
-      }
-
+      const type = types[wordIdx % types.length];
       wordIdx++;
-
-      if (type === 'match') {
-        generated.push({
-          type: 'choose',
-          word,
-          options,
-          correctAnswer: word.translation,
-          prompt: 'Выбери правильный перевод:',
-          promptAr: word.arabic,
-        });
-        continue;
-      }
 
       if (type === 'listen') {
         generated.push({
@@ -144,9 +143,7 @@ export function ExercisePage() {
           prompt: 'Что означает это слово?',
           promptAr: word.arabic,
         });
-        continue;
-      }
-      if (type === 'build') {
+      } else if (type === 'build') {
         generated.push({
           type: 'build',
           word,
@@ -156,16 +153,21 @@ export function ExercisePage() {
           promptAr: word.translation,
           scrambledLetters: scrambleWord(word.arabic),
         });
-        continue;
+      } else {
+        generated.push({
+          type: 'choose',
+          word,
+          options,
+          correctAnswer: word.translation,
+          prompt: 'Выбери правильный перевод:',
+          promptAr: word.arabic,
+        });
       }
-      generated.push({
-        type: 'choose',
-        word,
-        options,
-        correctAnswer: word.translation,
-        prompt: 'Выбери правильный перевод:',
-        promptAr: word.arabic,
-      });
+    }
+
+    for (let i = generated.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [generated[i], generated[j]] = [generated[j], generated[i]];
     }
 
     setQuestions(generated);
@@ -193,26 +195,22 @@ export function ExercisePage() {
     }
   }, [showResult, currentQuestion, markWordKnown, markWordUnknown, streak]);
 
-  const handleBuildLetter = useCallback((letter: string, idx: number) => {
+  const handleBuildLetter = useCallback((letter: string, id: number) => {
     if (showResult || !currentQuestion) return;
-    setBuiltWord(prev => [...prev, letter]);
-    setBuildLetters(prev => {
-      const next = [...prev];
-      next.splice(idx, 1);
-      return next;
-    });
+    setBuiltWord(prev => [...prev, { letter, id }]);
+    setBuildLetters(prev => prev.filter(l => l.id !== id));
   }, [showResult, currentQuestion]);
 
   const handleUndoLetter = useCallback(() => {
     if (showResult || builtWord.length === 0) return;
-    const lastLetter = builtWord[builtWord.length - 1];
+    const last = builtWord[builtWord.length - 1];
     setBuiltWord(prev => prev.slice(0, -1));
-    setBuildLetters(prev => [...prev, lastLetter].sort(() => Math.random() - 0.5));
+    setBuildLetters(prev => [...prev, last].sort(() => Math.random() - 0.5));
   }, [showResult, builtWord]);
 
   const handleSubmitBuild = useCallback(() => {
     if (!currentQuestion || showResult) return;
-    const answer = builtWord.join('');
+    const answer = builtWord.map(l => l.letter).join('');
     const correct = answer === currentQuestion.correctAnswer.replace(/\s/g, '');
     setIsCorrect(correct);
     setShowResult(true);
@@ -236,14 +234,12 @@ export function ExercisePage() {
       setIsCorrect(null);
       setShowResult(false);
       setBuiltWord([]);
-      if (currentQuestion?.type === 'build' && currentQuestion?.scrambledLetters) {
-        setBuildLetters([...currentQuestion.scrambledLetters].sort(() => Math.random() - 0.5));
-      }
+      setBuildLetters([]);
     } else {
       completeLesson(lessonId || '', score + finalCorrect, questions.length);
       setIsComplete(true);
     }
-  }, [currentIndex, questions.length, score, isCorrect, lessonId, completeLesson, currentQuestion]);
+  }, [currentIndex, questions.length, score, isCorrect, lessonId, completeLesson]);
 
   const handleMatchClick = useCallback((side: 'arabic' | 'translation', index: number) => {
     if (!matchWords[index]) return;
@@ -300,21 +296,11 @@ export function ExercisePage() {
 
   useEffect(() => {
     if (currentQuestion?.type === 'build' && currentQuestion?.scrambledLetters) {
-      setBuildLetters([...currentQuestion.scrambledLetters].sort(() => Math.random() - 0.5));
+      setBuildLetters(currentQuestion.scrambledLetters.map((l, i) => ({ letter: l, id: i })));
       setBuiltWord([]);
     }
-    if (currentQuestion?.type === 'match') {
-      const idx = currentIndex;
-      const count = 4;
-      const lesson = lessonPath.find(l => l.id === lessonId);
-      if (!lesson?.wordIds) return;
-      const lessonWordIds = lesson.wordIds.slice(idx, idx + count + 4);
-      const pairs: MatchPair[] = getWordsByIds(lessonWordIds.slice(idx, idx + count)).map(w => ({
-        arabic: w.arabic,
-        translation: w.translation,
-        wordId: w.id,
-      }));
-      setMatchWords(pairs.sort(() => Math.random() - 0.5));
+    if (currentQuestion?.type === 'match' && currentQuestion?.matchPairs) {
+      setMatchWords(currentQuestion.matchPairs.sort(() => Math.random() - 0.5));
       setMatchedIndices([]);
       setMatchSelected(null);
       setMatchShake(null);
@@ -501,34 +487,30 @@ export function ExercisePage() {
               {/* Build type */}
               {currentQuestion?.type === 'build' && (
                 <div className={styles.buildSection}>
-                  <div className={styles.buildSlots}>
-                    {builtWord.map((letter, i) => (
-                      <motion.div
-                        key={`filled-${i}`}
-                        className={styles.buildSlot}
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                      >
-                        {letter}
-                      </motion.div>
-                    ))}
-                    {Array.from({ length: Math.max(0, (currentQuestion?.correctAnswer.replace(/\s/g, '').length || 0) - builtWord.length) }).map((_, i) => (
-                      <div key={`empty-${i}`} className={`${styles.buildSlot} ${styles.buildSlotEmpty}`} />
-                    ))}
+                  <div className={styles.buildWordDisplay}>
+                    <span className={styles.buildWordText}>
+                      {builtWord.map(l => l.letter).join('')}
+                    </span>
+                    {builtWord.length < (currentQuestion?.correctAnswer.replace(/\s/g, '').length || 0) && (
+                      <span className={styles.buildCursor}>|</span>
+                    )}
                   </div>
+                  <p className={styles.buildHint}>
+                    {builtWord.length} / {currentQuestion?.correctAnswer.replace(/\s/g, '').length} букв
+                  </p>
 
                   {!showResult && (
                     <>
                       <div className={styles.letterPool}>
-                        {buildLetters.map((letter, idx) => (
+                        {buildLetters.map((item) => (
                           <motion.button
-                            key={`${letter}-${idx}`}
+                            key={`letter-${item.id}`}
                             className={styles.letterBtn}
-                            onClick={() => handleBuildLetter(letter, idx)}
+                            onClick={() => handleBuildLetter(item.letter, item.id)}
                             whileTap={{ scale: 0.9 }}
                             whileHover={{ scale: 1.1 }}
                           >
-                            {letter}
+                            {item.letter}
                           </motion.button>
                         ))}
                       </div>
