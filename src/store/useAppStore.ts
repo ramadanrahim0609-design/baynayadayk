@@ -32,6 +32,8 @@ interface AppState {
   isPremium: boolean;
   dailyRewardClaimed: boolean;
   lastDailyRewardDate: string | null;
+  reviewedInCards: string[];
+  completedInExercises: string[];
 
   setTheme: (theme: ThemeMode) => void;
   setOnboarded: (value: boolean) => void;
@@ -47,6 +49,8 @@ interface AppState {
   markWordUnknown: (wordId: string) => void;
   addToFavorites: (wordId: string) => void;
   removeFromFavorites: (wordId: string) => void;
+  markWordReviewedInCards: (wordId: string) => void;
+  markWordCompletedInExercise: (wordId: string) => void;
 
   getWordsForReview: () => Word[];
   getFavoriteWords: () => Word[];
@@ -60,6 +64,9 @@ interface AppState {
   getTotalWordsLearned: () => number;
   claimDailyReward: () => number;
   canClaimDailyReward: () => boolean;
+
+  getLearningWords: () => Word[];
+  getLearnedWords: () => Word[];
 }
 
 const calculateNextReview = (session: StudySession, status: 'known' | 'unknown'): StudySession => {
@@ -120,6 +127,8 @@ export const useAppStore = create<AppState>()(
       isPremium: false,
       dailyRewardClaimed: false,
       lastDailyRewardDate: null,
+      reviewedInCards: [],
+      completedInExercises: [],
 
       setTheme: (theme) => set({ theme }),
       setOnboarded: (value) => set({ hasOnboarded: value }),
@@ -398,6 +407,30 @@ export const useAppStore = create<AppState>()(
         get().addXP(bonus);
         get().checkAchievements();
         return bonus;
+      },
+
+      markWordReviewedInCards: (wordId) => {
+        const { reviewedInCards } = get();
+        if (!reviewedInCards.includes(wordId)) {
+          set({ reviewedInCards: [...reviewedInCards, wordId] });
+        }
+      },
+
+      markWordCompletedInExercise: (wordId) => {
+        const { completedInExercises } = get();
+        if (!completedInExercises.includes(wordId)) {
+          set({ completedInExercises: [...completedInExercises, wordId] });
+        }
+      },
+
+      getLearningWords: () => {
+        const { reviewedInCards } = get();
+        return words.filter(w => reviewedInCards.includes(w.id));
+      },
+
+      getLearnedWords: () => {
+        const { completedInExercises } = get();
+        return words.filter(w => completedInExercises.includes(w.id));
       },
     }),
     {

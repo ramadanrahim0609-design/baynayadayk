@@ -53,7 +53,7 @@ export function ExercisePage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const lessonId = searchParams.get('lesson');
-  const { completeLesson, getWordsByIds, markWordKnown, markWordUnknown, addXP } = useAppStore();
+  const { completeLesson, getWordsByIds, markWordKnown, markWordUnknown, addXP, markWordCompletedInExercise } = useAppStore();
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -187,13 +187,16 @@ export function ExercisePage() {
       setScore(prev => prev + 1);
       setStreak(newStreak);
       if (newStreak >= 3) setShowConfetti(true);
-      if (currentQuestion.word) markWordKnown(currentQuestion.word.id);
+      if (currentQuestion.word) {
+        markWordKnown(currentQuestion.word.id);
+        markWordCompletedInExercise(currentQuestion.word.id);
+      }
     } else {
       setStreak(0);
       setHearts(prev => prev - 1);
       if (currentQuestion.word) markWordUnknown(currentQuestion.word.id);
     }
-  }, [showResult, currentQuestion, markWordKnown, markWordUnknown, streak]);
+  }, [showResult, currentQuestion, markWordKnown, markWordUnknown, streak, markWordCompletedInExercise]);
 
   const handleBuildLetter = useCallback((letter: string, id: number) => {
     if (showResult || !currentQuestion) return;
@@ -218,13 +221,16 @@ export function ExercisePage() {
     if (correct) {
       setScore(prev => prev + 1);
       setStreak(prev => prev + 1);
-      if (currentQuestion.word) markWordKnown(currentQuestion.word.id);
+      if (currentQuestion.word) {
+        markWordKnown(currentQuestion.word.id);
+        markWordCompletedInExercise(currentQuestion.word.id);
+      }
     } else {
       setStreak(0);
       setHearts(prev => prev - 1);
       if (currentQuestion.word) markWordUnknown(currentQuestion.word.id);
     }
-  }, [currentQuestion, showResult, builtWord, markWordKnown, markWordUnknown]);
+  }, [currentQuestion, showResult, builtWord, markWordKnown, markWordUnknown, markWordCompletedInExercise]);
 
   const handleNext = useCallback(() => {
     const finalCorrect = isCorrect ? 1 : 0;
@@ -267,6 +273,7 @@ export function ExercisePage() {
       setMatchSelected(null);
       setMatchScore(prev => prev + 1);
       markWordKnown(leftWord.wordId);
+      markWordCompletedInExercise(leftWord.wordId);
 
       if (matchedIndices.length + 1 >= matchWords.length) {
         const timeBonus = Math.max(0, 30 - Math.floor((Date.now() - matchStartTime) / 1000));
@@ -286,7 +293,7 @@ export function ExercisePage() {
         setMatchSelected(null);
       }, 600);
     }
-  }, [matchWords, matchedIndices, matchSelected, matchStartTime, matchScore, handleNext, markWordKnown, addXP]);
+  }, [matchWords, matchedIndices, matchSelected, matchStartTime, matchScore, handleNext, markWordKnown, addXP, markWordCompletedInExercise]);
 
   useEffect(() => {
     if (hearts <= 0) {

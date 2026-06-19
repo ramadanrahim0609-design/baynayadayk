@@ -16,7 +16,7 @@ export function CardReviewPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const lessonId = searchParams.get('lesson');
-  const { completeLesson, addXP, getWordsByIds, markWordKnown, markWordUnknown } = useAppStore();
+  const { completeLesson, addXP, getWordsByIds, markWordKnown, markWordUnknown, markWordReviewedInCards } = useAppStore();
 
   const [reviewWords, setReviewWords] = useState<typeof words>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -67,6 +67,7 @@ export function CardReviewPage() {
   const handleKnown = useCallback(() => {
     if (!currentWord) return;
     markWordKnown(currentWord.id);
+    markWordReviewedInCards(currentWord.id);
     setKnownCount(prev => prev + 1);
     setShowResult('known');
     setTimeout(() => {
@@ -75,7 +76,7 @@ export function CardReviewPage() {
       if (currentIndex < reviewWords.length - 1) setCurrentIndex(prev => prev + 1);
       else setIsComplete(true);
     }, 500);
-  }, [currentWord, currentIndex, reviewWords.length, markWordKnown]);
+  }, [currentWord, currentIndex, reviewWords.length, markWordKnown, markWordReviewedInCards]);
 
   const handleUnknown = useCallback(() => {
     if (!currentWord) return;

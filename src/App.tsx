@@ -9,6 +9,7 @@ import { StatsPage } from './pages/StatsPage';
 import { SpeechPage } from './pages/SpeechPage';
 import { AboutPage } from './pages/AboutPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { WordsPage } from './pages/WordsPage';
 import './styles/globals.css';
 
 function AppContent() {
@@ -39,6 +40,7 @@ function AppContent() {
       <Route path="/stats" element={<StatsPage />} />
       <Route path="/speech" element={<SpeechPage />} />
       <Route path="/about" element={<AboutPage />} />
+      <Route path="/words" element={<WordsPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
